@@ -142,7 +142,7 @@ Module Module1
                                 "Group By t_year, month(t_rgdt), t_emno, t_cprj, t_cspa, LTRIM(STR(t_year)) + right('0'+LTRIM(STR(MONTH(t_rgdt))), 2)+'28', t_cstl, t_ccco " +
                                 ") a " +
                                 "LEFT JOIN ttccom001100 b ON b.t_emno = a.t_emno " +
-                                "WHERE t_rats BETWEEN 1 And 3"
+                                "WHERE a.t_emno IN (SELECT t_emno FROM ttccom001100 WHERE t_emno between 100000 and 199999)"
                 command.ExecuteNonQuery()
             End Using
         Catch ex As Exception

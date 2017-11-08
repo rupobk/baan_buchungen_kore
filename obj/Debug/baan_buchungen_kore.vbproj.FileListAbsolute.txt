@@ -29,3 +29,14 @@ D:\OneDrive - Atzwanger AG\Visual Studio 2017\Projects\Baan\baan_buchungen_kore\
 D:\OneDrive - Atzwanger AG\Visual Studio 2017\Projects\Baan\baan_buchungen_kore\baan_buchungen_kore\obj\Debug\baan_buchungen_kore.exe
 D:\OneDrive - Atzwanger AG\Visual Studio 2017\Projects\Baan\baan_buchungen_kore\baan_buchungen_kore\obj\Debug\baan_buchungen_kore.xml
 D:\OneDrive - Atzwanger AG\Visual Studio 2017\Projects\Baan\baan_buchungen_kore\baan_buchungen_kore\obj\Debug\baan_buchungen_kore.pdb
+D:\Daten\Dokumente\Visual Studio 2017\Projects\Baan\baan_buchungen_kore\bin\Debug\baan_buchungen_kore.exe.config
+D:\Daten\Dokumente\Visual Studio 2017\Projects\Baan\baan_buchungen_kore\bin\Debug\baan_buchungen_kore.exe
+D:\Daten\Dokumente\Visual Studio 2017\Projects\Baan\baan_buchungen_kore\bin\Debug\baan_buchungen_kore.pdb
+D:\Daten\Dokumente\Visual Studio 2017\Projects\Baan\baan_buchungen_kore\bin\Debug\baan_buchungen_kore.xml
+D:\Daten\Dokumente\Visual Studio 2017\Projects\Baan\baan_buchungen_kore\obj\Debug\baan_buchungen_kore.vbprojResolveAssemblyReference.cache
+D:\Daten\Dokumente\Visual Studio 2017\Projects\Baan\baan_buchungen_kore\obj\Debug\baan_buchungen_kore.Resources.resources
+D:\Daten\Dokumente\Visual Studio 2017\Projects\Baan\baan_buchungen_kore\obj\Debug\baan_buchungen_kore.vbproj.GenerateResource.Cache
+D:\Daten\Dokumente\Visual Studio 2017\Projects\Baan\baan_buchungen_kore\obj\Debug\baan_buchungen_kore.vbproj.CoreCompileInputs.cache
+D:\Daten\Dokumente\Visual Studio 2017\Projects\Baan\baan_buchungen_kore\obj\Debug\baan_buchungen_kore.exe
+D:\Daten\Dokumente\Visual Studio 2017\Projects\Baan\baan_buchungen_kore\obj\Debug\baan_buchungen_kore.xml
+D:\Daten\Dokumente\Visual Studio 2017\Projects\Baan\baan_buchungen_kore\obj\Debug\baan_buchungen_kore.pdb
