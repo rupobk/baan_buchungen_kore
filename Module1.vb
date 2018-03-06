@@ -4,7 +4,6 @@ Imports System.Diagnostics
 
 Module Module1
     Dim conBaan As New SqlConnection("Server=baan4;Database=baan4db;User Id=sa; Password=Baan123;")
-    Public jahr As String
     Public args(10) As String
     Public stundensatz As String
     Public bewegungssatz As String
@@ -35,74 +34,16 @@ Module Module1
 
     Sub ProgrammParameterLesen()
         'args(0) = Programmname
-        'args(1) = Prozedurname
-
-        'Wenn Prozedurname=fahrzeugkosten, dann:
-        'args(2) = Geschäftsjahr
-
-        'Wenn Prozedurname=werkzeugkosten, dann:
-        'args(2) = Geschäftsjahr
-        'args(3) = Stundensatz
-
-        'Wenn Prozedurname=produktionskosten, dann:
-        'args(2) = Geschäftsjahr
-        'args(3) = Stundensatz
-
-        'Wenn Prozedurname=logistikkosten, dann:
-        'args(2) = Geschäftsjahr
-        'args(3) = Kosten pro Bewegung
 
         Try
             'Prozedurname
             args(1) = Environment.GetCommandLineArgs(1).ToUpper
 
-            Select Case args(1)
-                Case "FAHRZEUGKOSTEN"
-                    args(2) = Environment.GetCommandLineArgs(2)   'Geschäftsjahr
-                    jahr = args(2)
-                Case "WERKZEUGKOSTEN"
-                    args(2) = Environment.GetCommandLineArgs(2)  'Geschäftsjahr
-                    args(3) = Environment.GetCommandLineArgs(3)  'Stundensatz
-                    jahr = args(2)
-                    stundensatz = args(3)
-                Case "PRODUKTIONSKOSTEN"
-                    args(2) = Environment.GetCommandLineArgs(2)  'Geschäftsjahr
-                    args(3) = Environment.GetCommandLineArgs(3)  'Stundensatz
-                    jahr = args(2)
-                    stundensatz = args(3)
-                Case "LOGISTIKKOSTEN"
-                    args(2) = Environment.GetCommandLineArgs(2)  'Geschäftsjahr
-                    args(3) = Environment.GetCommandLineArgs(3)  'Kostensatz Bewegung
-                    jahr = args(2)
-                    bewegungssatz = args(3)
-
-            End Select
-
         Catch ex As Exception
             Console.WriteLine("")
             Console.WriteLine("")
             Console.WriteLine("Programm baan_buchungen_kore wird mit folgenden Argumenten aufgerufen:")
-            Select Case args(1)
-                Case "FAHRZEUGKOSTEN"
-                    Console.WriteLine("- Prozedurname fahrzeugkosten")
-                    Console.WriteLine("- Geschäftsjahr")
-                Case "WERKZEUGKOSTEN"
-                    Console.WriteLine("- Prozedurname werkzeugkosten")
-                    Console.WriteLine("- Geschäftsjahr")
-                    Console.WriteLine("- Stundensatz (Achtung auf '.' anstatt Komma bei Kommastellen)")
-                Case "PRODUKTIONSKOSTEN"
-                    Console.WriteLine("- Prozedurname produktionskosten")
-                    Console.WriteLine("- Geschäftsjahr")
-                    Console.WriteLine("- Stundensatz (Achtung auf '.' anstatt Komma bei Kommastellen)")
-                Case "LOGISTIKKOSTEN"
-                    Console.WriteLine("- Prozedurname logistikkosten")
-                    Console.WriteLine("- Geschäftsjahr")
-                    Console.WriteLine("- Bewegungssatz (Achtung auf '.' anstatt Komma bei Kommastellen)")
-                Case Else
-                    Console.WriteLine("- Prozedur: welche Metadaten sollen generiert werden (fahrzeugkosten, werkzeugkosten, produktionskosten, logistikkosten)")
-                    Console.WriteLine("- weitere Parameter je nach Prozedurname")
-                    Console.WriteLine("Zweck des Programmes: Generierung von Kore-Buchungen für die Deckungsbeitragsrechnung.")
-            End Select
+            Console.WriteLine("fahrzeugkosten oder werkzeugkosten oder produktionskosten oder logistikkosten")
             LogSchreiben("Sub ProgrammParameterLesen: Programmaufrufparameter falsch!")
             LogSchreiben("Programm baan_buchungen_kore mit Fehler beendet.")
             Threading.Thread.Sleep(30000)
@@ -116,7 +57,7 @@ Module Module1
         Try
             Using conBaan
                 'Lösche alle bestehenden Bewegungen des Jahres weg
-                Dim command As SqlCommand = New SqlCommand("DELETE from ttpppc231100 where t_emno between 100000 and 199999 and t_year=" + jahr, conBaan)
+                Dim command As SqlCommand = New SqlCommand("DELETE from ttpppc231100 where t_emno between 100000 and 199999 and t_year=YEAR(DATEADD(MONTH, -1, GETDATE()))", conBaan)
                 conBaan.Open()
                 command.Connection = conBaan
                 command.ExecuteNonQuery()
@@ -129,7 +70,7 @@ Module Module1
                 '- Der Stundentarif kommt aus den Stammdaten der Personalnr. mit Kodex über 100000
                 command.CommandText = "INSERT INTO ttpppc231100 " +
                                 "Select t_year, t_peri, a.t_emno, ROW_NUMBER() OVER (ORDER BY a.t_emno) As t_sern, t_cprj, t_cspa, '  1' AS t_cpla, " +
-                                "'     ***' AS t_cact, '   '+t_tefx AS t_task, GETDATE() AS t_ltdt, t_rgdt, t_quan, round(t_wgrt, 2), round(t_wgrt*t_quan, 2) AS t_amoc, " +
+                                "'     ***' AS t_cact, t_tefx AS t_task, GETDATE() AS t_ltdt, t_rgdt, t_quan, round(t_wgrt, 2), round(t_wgrt*t_quan, 2) AS t_amoc, " +
                                 "0 As t_rats, 0 As t_amos, '001' AS t_cwgt, 'costi autovettura' AS t_desc, '' AS t_cdoc, t_year AS t_cyea, t_peri AS t_cper, " +
                                 "t_peri As t_fper, t_year As t_fyea, '100' AS t_ncmp, '2' AS t_cfpo, '1' AS t_potf, t_cstl, t_ccco, '1' AS t_tetc, '2' AS t_sttl, " +
                                 "'0' AS t_txta, 'damii' AS t_loco, '0' AS t_hemp, '0' AS t_serc, '0' AS t_wgcs, '0' AS t_serh, '0' AS t_Refcntd, '0' AS t_refcntu " +
@@ -138,11 +79,15 @@ Module Module1
                                 "Select t_year, MONTH(t_rgdt) As t_peri, 100000+t_emno As t_emno, t_cprj, t_cspa, LTRIM(STR(t_year))+ " +
                                 "right('0'+LTRIM(STR(MONTH(t_rgdt))), 2)+'28' AS t_rgdt, t_cstl, t_ccco, SUM(t_quan) AS t_quan " +
                                 "From ttpppc231100 " +
-                                "Where t_year = " + jahr + " And (ltrim(t_task) Between '10100' And '10530' or ltrim(t_task) Between '12100' AND '13830') " +
+                                "Where t_year = YEAR(DATEADD(MONTH, -1, GETDATE())) And (ltrim(t_task) Between '10100' And '10530' or ltrim(t_task) Between '12100' AND '13830') " +
                                 "Group By t_year, month(t_rgdt), t_emno, t_cprj, t_cspa, LTRIM(STR(t_year)) + right('0'+LTRIM(STR(MONTH(t_rgdt))), 2)+'28', t_cstl, t_ccco " +
                                 ") a " +
                                 "LEFT JOIN ttccom001100 b ON b.t_emno = a.t_emno " +
                                 "WHERE a.t_emno IN (SELECT t_emno FROM ttccom001100 WHERE t_emno between 100000 and 199999)"
+                command.ExecuteNonQuery()
+
+                'bei Energie/Müll-Baustellen immer als Element 90000000 angeben
+                command.CommandText = "UPDATE ttpppc231100 SET t_cspa='90000000' WHERE t_emno>100000 AND LTRIM(t_cspa)='***' AND t_cprj IN (SELECT t_cprj FROM ttpptc130100 WHERE t_cspa='90000000')"
                 command.ExecuteNonQuery()
             End Using
         Catch ex As Exception
@@ -164,7 +109,7 @@ Module Module1
         Try
             Using conBaan
                 'Lösche alle bestehenden Bewegungen des Jahres weg
-                Dim command As SqlCommand = New SqlCommand("DELETE from ttpppc231100 where t_emno=900250 And t_year=" + jahr, conBaan)
+                Dim command As SqlCommand = New SqlCommand("DELETE from ttpppc231100 where t_emno=900250 And t_year=YEAR(DATEADD(MONTH, -1, GETDATE()))", conBaan)
                 conBaan.Open()
                 command.Connection = conBaan
                 command.ExecuteNonQuery()
@@ -172,11 +117,13 @@ Module Module1
                 'Wichtig:
                 '- als t_rgdt nehme ich den 28. des jeweiligen Monats, auf diese Weise muss ich nicht umständlich berechnen, welcher der letzte Tag im Monat ist
                 '- mit der Funktion ROW_NUMBER() wird die fortlaufende Bewegungsnummer generiert
+                '- der Stundentarif wird aus den Stammdaten vom Mitarbeiter '900250' gezogen
+                '- Das Jahr wird immer bis Ende Januar des Folgejahres mit dem Vorjahr gebucht u. anschliessend mit dem Folgejahr
 
                 command.CommandText = "INSERT INTO ttpppc231100 " +
                                       "Select t_year, t_peri, '900250' as t_emno, ROW_NUMBER() OVER (ORDER BY t_cprj) AS t_sern, t_cprj, t_cspa, '  1' AS t_cpla, " +
-                                      "'     ***' AS t_cact, '   11136' as t_task, GETDATE() AS t_ltdt, t_rgdt, t_quan, " + stundensatz + " as t_wgrt, " +
-                                      "round(t_quan*" + stundensatz + ",2) As t_amoc, 0 As t_rats, 0 As t_amos, '001' AS t_cwgt, 'ribaltamento costi produzione' AS t_desc, " +
+                                      "'     ***' AS t_cact, '   11136' as t_task, GETDATE() AS t_ltdt, t_rgdt, t_quan, b.t_wgrt, " +
+                                      "round(t_quan*b.t_wgrt,2) As t_amoc, 0 As t_rats, 0 As t_amos, '001' AS t_cwgt, 'ribaltamento costi produzione' AS t_desc, " +
                                       "'' AS t_cdoc, t_year AS t_cyea, t_peri AS t_cper, t_peri AS t_fper, t_year AS t_fyea, '100' AS t_ncmp, '2' AS t_cfpo, " +
                                       "'1' AS t_potf, t_cstl, '    1060' AS t_ccco, '1' AS t_tetc, '2' AS t_sttl, '0' AS t_txta, 'damii' AS t_loco, '0' AS t_hemp, " +
                                       "'0' AS t_serc, '0' AS t_wgcs, '0' AS t_serh, '0' AS t_Refcntd, '0' AS t_refcntu " +
@@ -184,10 +131,19 @@ Module Module1
                                       "Select t_year, MONTH(t_rgdt) As t_peri, t_cprj, t_cspa, LTRIM(STR(t_year))+right('0'+LTRIM(STR(MONTH(t_rgdt))), 2)+'28' AS t_rgdt, " +
                                       "t_cstl, SUM(t_quan) AS t_quan " +
                                       "From ttpppc231100 " +
-                                      "Where t_year = " + jahr + " And LTrim(t_task) like '104%' " +
+                                      "Where t_year = YEAR(DATEADD(MONTH, -1, GETDATE())) And LTrim(t_task) like '104%' " +
                                       "GROUP BY t_year, Month(t_rgdt), t_cprj, t_cspa, LTrim(Str(t_year)) + Right('0'+LTRIM(STR(MONTH(t_rgdt))), 2)+'28', t_cstl " +
-                                      ") summen"
-                Command.ExecuteNonQuery()
+                                      ") summen LEFT JOIN ttccom001100 b ON b.t_emno=900250"
+                command.ExecuteNonQuery()
+
+                'Auch Produktionskosten neu rechnen mit Plantarif
+                command.CommandText = "UPDATE ttihra100100 SET t_wgca=round(t_hrea*b.t_wgrt, 2) " +
+                                      "FROM ttihra100100 LEFT JOIN ttccom001100 b ON b.t_emno=900250 WHERE t_year=YEAR(DATEADD(MONTH, -1, GETDATE())) And t_tano<160"
+                command.ExecuteNonQuery()
+
+                'bei Energie/Müll-Baustellen immer als Element 90000000 angeben
+                command.CommandText = "UPDATE ttpppc231100 SET t_cspa='90000000' WHERE t_emno>900000 AND LTRIM(t_cspa)='***' AND t_cprj IN (SELECT t_cprj FROM ttpptc130100 WHERE t_cspa='90000000')"
+                command.ExecuteNonQuery()
             End Using
         Catch ex As Exception
             LogSchreiben("Fehler In Sub BuchenProduktionskosten!")
@@ -207,7 +163,7 @@ Module Module1
         Try
             Using conBaan
                 'Lösche alle bestehenden Bewegungen des Jahres weg
-                Dim command As SqlCommand = New SqlCommand("DELETE from ttpppc231100 where t_emno=900230 and t_year=" + jahr, conBaan)
+                Dim command As SqlCommand = New SqlCommand("DELETE from ttpppc231100 where t_emno=900230 and t_year=YEAR(DATEADD(MONTH, -1, GETDATE()))", conBaan)
                 conBaan.Open()
                 command.Connection = conBaan
                 command.ExecuteNonQuery()
@@ -215,22 +171,28 @@ Module Module1
                 'Wichtig:
                 '- als t_rgdt nehme ich den 28. des jeweiligen Monats, auf diese Weise muss ich nicht umständlich berechnen, welcher der letzte Tag im Monat ist
                 '- mit der Funktion ROW_NUMBER() wird die fortlaufende Bewegungsnummer generiert
+                '- der Stundentarif wird aus den Stammdaten vom Mitarbeiter '900230' gezogen
+                '- Das Jahr wird immer bis Ende Januar des Folgejahres mit dem Vorjahr gebucht u. anschliessend mit dem Folgejahr
 
                 command.CommandText = "INSERT INTO ttpppc231100 " +
                                  "SELECT t_year, t_peri, '900230' as t_emno, ROW_NUMBER() OVER (ORDER BY t_cprj) AS t_sern, t_cprj, t_cspa, '  1' AS t_cpla, " +
-                                 "'     ***' AS t_cact, '   11133' as t_task, GETDATE() AS t_ltdt, t_rgdt, t_quan, " + stundensatz + " as t_wgrt, " + stundensatz +
-                                 " * t_quan As t_amoc, 0 As t_rats, 0 As t_amos, '001' AS t_cwgt, 'ribaltamento costi attrezzi' AS t_desc, '' AS t_cdoc, " +
+                                 "'     ***' AS t_cact, '   11133' as t_task, GETDATE() AS t_ltdt, t_rgdt, t_quan, b.t_wgrt, round(t_quan*b.t_wgrt, 2) " +
+                                 "As t_amoc, 0 As t_rats, 0 As t_amos, '001' AS t_cwgt, 'ribaltamento costi attrezzi' AS t_desc, '' AS t_cdoc, " +
                                  "t_year AS t_cyea, t_peri AS t_cper, t_peri AS t_fper, t_year AS t_fyea, '100' AS t_ncmp, '2' AS t_cfpo, '1' AS t_potf, t_cstl, " +
                                  "'    1060' AS t_ccco, '1' AS t_tetc, '2' AS t_sttl, '0' AS t_txta, 'damii' AS t_loco, '0' AS t_hemp, '0' AS t_serc, '0' AS t_wgcs, " +
                                  "'0' AS t_serh, '0' AS t_Refcntd, '0' AS t_refcntu FROM (" +  'hier kommt das SQL, mit dem zuerst die Stunden pro Periode summiert werden
                                  "Select t_year, Month(t_rgdt) As t_peri, t_cprj, t_cspa, LTrim(Str(t_year)) + Right('0'+LTRIM(STR(MONTH(t_rgdt))), 2)+'28' AS t_rgdt, " +
                                  "t_cstl, SUM(t_quan) AS t_quan FROM ( " +    'hier kommt das SQL mit den Detailstunden eigene u. Dritte Arbeiterstunden
-                                 "SELECT t_year, t_rgdt, t_cprj, t_cspa, t_cstl, t_quan From ttpppc231100 Where t_year = " + jahr + " And LTrim(t_task) Between '10100' AND '10160' " +
+                                 "SELECT t_year, t_rgdt, t_cprj, t_cspa, t_cstl, t_quan From ttpppc231100 Where t_year = YEAR(DATEADD(MONTH, -1, GETDATE())) And LTrim(t_task) Between '10100' AND '10160' " +
                                  "UNION all " +
-                                 "Select t_year, t_rgdt, t_cprj, t_cspa, t_cstl, t_quan FROM ttpppc271100 WHERE t_year = " + jahr + " And LTrim(t_csub) BETWEEN 'S100' AND 'S150' " +
+                                 "Select t_year, t_rgdt, t_cprj, t_cspa, t_cstl, t_quan FROM ttpppc271100 WHERE t_year = YEAR(DATEADD(MONTH, -1, GETDATE())) And LTrim(t_csub) BETWEEN 'S100' AND 'S150' " +
                                  ") detail " +
                                  "GROUP BY t_year, Month(t_rgdt), t_cprj, t_cspa, LTrim(Str(t_year)) + Right('0'+LTRIM(STR(MONTH(t_rgdt))), 2)+'28', t_cstl " +
-                                 ") summen"
+                                 ") summen LEFT JOIN ttccom001100 b ON b.t_emno=900230"
+                command.ExecuteNonQuery()
+
+                'bei Energie/Müll-Baustellen immer als Element 90000000 angeben
+                command.CommandText = "UPDATE ttpppc231100 SET t_cspa='90000000' WHERE t_emno>900000 AND LTRIM(t_cspa)='***' AND t_cprj IN (SELECT t_cprj FROM ttpptc130100 WHERE t_cspa='90000000')"
                 command.ExecuteNonQuery()
             End Using
         Catch ex As Exception
@@ -251,7 +213,7 @@ Module Module1
         Try
             Using conBaan
                 'Lösche alle bestehenden Bewegungen des Jahres weg
-                Dim command As SqlCommand = New SqlCommand("DELETE from ttpppc231100 where t_emno=900270 and t_year=" + jahr, conBaan)
+                Dim command As SqlCommand = New SqlCommand("DELETE from ttpppc231100 where t_emno=900270 and t_year=YEAR(DATEADD(MONTH, -1, GETDATE()))", conBaan)
                 conBaan.Open()
                 command.Connection = conBaan
                 command.ExecuteNonQuery()
@@ -259,23 +221,25 @@ Module Module1
                 'Wichtig:
                 '- als t_rgdt nehme ich den 28. des jeweiligen Monats, auf diese Weise muss ich nicht umständlich berechnen, welcher der letzte Tag im Monat ist
                 '- mit der Funktion ROW_NUMBER() wird die fortlaufende Bewegungsnummer generiert
+                '- der Stundentarif wird aus den Stammdaten vom Mitarbeiter '900270' gezogen
+                '- Das Jahr wird immer bis Ende Januar des Folgejahres mit dem Vorjahr gebucht u. anschliessend mit dem Folgejahr
 
                 command.CommandText = "INSERT INTO ttpppc231100 " +
                                       "SELECT t_year, t_peri, '900270' as t_emno, ROW_NUMBER() OVER (ORDER BY t_peri, t_cprj) AS t_sern, t_cprj, t_cspa, '  1' AS t_cpla, " +
-                                      "'     ***' AS t_cact, '   11137' as t_task, GETDATE() AS t_ltdt, t_rgdt, t_quan, " + bewegungssatz + " as t_wgrt, " + bewegungssatz +
-                                      "*t_quan AS t_amoc, 0 AS t_rats, 0 AS t_amos, '001' AS t_cwgt, 'ribaltamento costi logistiche' AS t_desc, '' AS t_cdoc, t_year AS t_cyea, " +
+                                      "'     ***' AS t_cact, '   11137' as t_task, GETDATE() AS t_ltdt, t_rgdt, t_quan, b.t_wgrt, round(t_quan*b.t_wgrt, 2) " +
+                                      "AS t_amoc, 0 AS t_rats, 0 AS t_amos, '001' AS t_cwgt, 'ribaltamento costi logistiche' AS t_desc, '' AS t_cdoc, t_year AS t_cyea, " +
                                       "t_peri AS t_cper, t_peri AS t_fper, t_year AS t_fyea, '100' AS t_ncmp, '2' AS t_cfpo, '1' AS t_potf, t_cstl, '    1060' AS t_ccco, " +
                                       "'1' AS t_tetc, '2' AS t_sttl, '0' AS t_txta, 'damii' AS t_loco, '0' AS t_hemp, '0' AS t_serc, '0' AS t_wgcs, '0' AS t_serh, " +
                                       "'0' AS t_Refcntd, '0' AS t_refcntu FROM ( " +
                                       "Select jahr As t_year, MONTH(datum) As t_peri, baustelle As t_cprj, '     ***' AS t_cspa, " +
                                       "LTRIM(STR(jahr))+right('0'+LTRIM(STR(MONTH(datum))), 2)+'28' AS t_rgdt, '' AS t_cstl, count(*) AS t_quan " +
-                                      "From SRVPREVERO.prev_staging_prod.dbo.t_belegdetail_material Where jahr = " + jahr +
+                                      "From SRVPREVERO.prev_staging_prod.dbo.t_belegdetail_material Where jahr = YEAR(DATEADD(MONTH, -1, GETDATE())) " +
                                       "Group By jahr, Month(datum), baustelle, LTrim(Str(jahr)) + Right('0'+LTRIM(STR(MONTH(datum))), 2)+'28' " +
-                                      ") summen"
+                                      ") summen LEFT JOIN ttccom001100 b ON b.t_emno=900270"
                 command.ExecuteNonQuery()
 
-                'bei Ecomaster-Baustellen immer als Element 90000000 angeben
-                command.CommandText = "update ttpppc231100 set t_cspa='90000000' where t_cprj like 'E%' and t_emno=900270"
+                'bei Energie/Müll-Baustellen immer als Element 90000000 angeben
+                command.CommandText = "UPDATE ttpppc231100 SET t_cspa='90000000' WHERE t_emno>900000 AND LTRIM(t_cspa)='***' AND t_cprj IN (SELECT t_cprj FROM ttpptc130100 WHERE t_cspa='90000000')"
                 command.ExecuteNonQuery()
             End Using
         Catch ex As Exception
