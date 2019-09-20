@@ -233,7 +233,7 @@ Module Module1
                                       "'0' AS t_Refcntd, '0' AS t_refcntu FROM ( " +
                                       "Select jahr As t_year, MONTH(datum) As t_peri, baustelle As t_cprj, '     ***' AS t_cspa, " +
                                       "LTRIM(STR(jahr))+right('0'+LTRIM(STR(MONTH(datum))), 2)+'28' AS t_rgdt, '' AS t_cstl, count(*) AS t_quan " +
-                                      "From SRVPREVERO.prev_staging_prod.dbo.t_belegdetail_material Where jahr = YEAR(DATEADD(MONTH, -1, GETDATE())) " +
+                                      "From SRVPREVERO.prev_staging_prod.dbo.t_belegdetail_material Where jahr = YEAR(DATEADD(MONTH, -1, GETDATE())) and ze1=1" +
                                       "Group By jahr, Month(datum), baustelle, LTrim(Str(jahr)) + Right('0'+LTRIM(STR(MONTH(datum))), 2)+'28' " +
                                       ") summen LEFT JOIN ttccom001100 b ON b.t_emno=900270"
                 command.ExecuteNonQuery()

@@ -40,3 +40,14 @@ D:\Daten\Dokumente\Visual Studio 2017\Projects\Baan\baan_buchungen_kore\obj\Debu
 D:\Daten\Dokumente\Visual Studio 2017\Projects\Baan\baan_buchungen_kore\obj\Debug\baan_buchungen_kore.xml
 D:\Daten\Dokumente\Visual Studio 2017\Projects\Baan\baan_buchungen_kore\obj\Debug\baan_buchungen_kore.pdb
 D:\Daten\Dokumente\Visual Studio 2017\Projects\Baan\baan_buchungen_kore\obj\Debug\baan_buchungen_kore.vbprojAssemblyReference.cache
+\\srvfile01\edv\Obkircher\Visual Studio 2017\Projects\Baan\baan_buchungen_kore\bin\Debug\baan_buchungen_kore.exe.config
+\\srvfile01\edv\Obkircher\Visual Studio 2017\Projects\Baan\baan_buchungen_kore\bin\Debug\baan_buchungen_kore.exe
+\\srvfile01\edv\Obkircher\Visual Studio 2017\Projects\Baan\baan_buchungen_kore\bin\Debug\baan_buchungen_kore.pdb
+\\srvfile01\edv\Obkircher\Visual Studio 2017\Projects\Baan\baan_buchungen_kore\bin\Debug\baan_buchungen_kore.xml
+\\srvfile01\edv\Obkircher\Visual Studio 2017\Projects\Baan\baan_buchungen_kore\obj\Debug\baan_buchungen_kore.vbprojAssemblyReference.cache
+\\srvfile01\edv\Obkircher\Visual Studio 2017\Projects\Baan\baan_buchungen_kore\obj\Debug\baan_buchungen_kore.Resources.resources
+\\srvfile01\edv\Obkircher\Visual Studio 2017\Projects\Baan\baan_buchungen_kore\obj\Debug\baan_buchungen_kore.vbproj.GenerateResource.cache
+\\srvfile01\edv\Obkircher\Visual Studio 2017\Projects\Baan\baan_buchungen_kore\obj\Debug\baan_buchungen_kore.vbproj.CoreCompileInputs.cache
+\\srvfile01\edv\Obkircher\Visual Studio 2017\Projects\Baan\baan_buchungen_kore\obj\Debug\baan_buchungen_kore.exe
+\\srvfile01\edv\Obkircher\Visual Studio 2017\Projects\Baan\baan_buchungen_kore\obj\Debug\baan_buchungen_kore.xml
+\\srvfile01\edv\Obkircher\Visual Studio 2017\Projects\Baan\baan_buchungen_kore\obj\Debug\baan_buchungen_kore.pdb
