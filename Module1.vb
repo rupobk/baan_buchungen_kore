@@ -57,7 +57,7 @@ Module Module1
         Try
             Using conBaan
                 'Lösche alle bestehenden Bewegungen des Jahres weg
-                Dim command As SqlCommand = New SqlCommand("DELETE from ttpppc231100 where t_emno between 100000 and 199999 and t_year=YEAR(DATEADD(MONTH, -1, GETDATE()))", conBaan)
+                Dim command As SqlCommand = New SqlCommand("DELETE from ttpppc231100 where t_desc like '%(mov.auto%' and t_year=YEAR(DATEADD(MONTH, -1, GETDATE()))", conBaan)
                 conBaan.Open()
                 command.Connection = conBaan
                 command.ExecuteNonQuery()
@@ -69,21 +69,18 @@ Module Module1
                 '- where t_rats between 1 and 3 nimmt nur die Bewegungen der Arbeiter, Fahrer u. Techniker
                 '- Der Stundentarif kommt aus den Stammdaten der Personalnr. mit Kodex über 100000
                 command.CommandText = "INSERT INTO ttpppc231100 " +
-                                "Select t_year, t_peri, a.t_emno, ROW_NUMBER() OVER (ORDER BY a.t_emno) As t_sern, t_cprj, t_cspa, '  1' AS t_cpla, " +
-                                "'     ***' AS t_cact, t_tefx AS t_task, GETDATE() AS t_ltdt, t_rgdt, t_quan, round(t_wgrt, 2), round(t_wgrt*t_quan, 2) AS t_amoc, " +
-                                "0 As t_rats, 0 As t_amos, '001' AS t_cwgt, 'costi autovettura' AS t_desc, '' AS t_cdoc, t_year AS t_cyea, t_peri AS t_cper, " +
+                                "Select t_year, t_peri, a.t_emno-100000 as t_emno, ROW_NUMBER() OVER (ORDER BY a.t_emno)+10000 As t_sern, t_cprj, t_cspa, '  1' AS t_cpla, " +
+                                "'     ***' AS t_cact, t_tefx AS t_task, GETDATE() AS t_ltdt, t_rgdt, t_quan, round(t_wgrt, 2) as t_ratc, round(t_wgrt*t_quan, 2) AS t_amoc, " +
+                                "0 As t_rats, 0 As t_amos, '001' AS t_cwgt, 'costi autovettura (mov.autom.)' AS t_desc, '' AS t_cdoc, t_year AS t_cyea, t_peri AS t_cper, " +
                                 "t_peri As t_fper, t_year As t_fyea, '100' AS t_ncmp, '2' AS t_cfpo, '1' AS t_potf, t_cstl, t_ccco, '1' AS t_tetc, '2' AS t_sttl, " +
                                 "'0' AS t_txta, 'damii' AS t_loco, '0' AS t_hemp, '0' AS t_serc, '0' AS t_wgcs, '0' AS t_serh, '0' AS t_Refcntd, '0' AS t_refcntu " +
                                 "FROM " +
                                 "( " +            'hier kommt das SQL, mit dem zuerst die Stunden pro Mitarbeiter u. Periode summiert werden
-                                "Select t_year, MONTH(t_rgdt) As t_peri, 100000+t_emno As t_emno, t_cprj, t_cspa, LTRIM(STR(t_year))+ " +
-                                "right('0'+LTRIM(STR(MONTH(t_rgdt))), 2)+'28' AS t_rgdt, t_cstl, t_ccco, SUM(t_quan) AS t_quan " +
+                                "Select t_year, month(getdate()) As t_peri, 100000+t_emno As t_emno, t_cprj, t_cspa, getdate() AS t_rgdt, t_cstl, t_ccco, SUM(t_quan) AS t_quan " +
                                 "From ttpppc231100 " +
                                 "Where t_year = YEAR(DATEADD(MONTH, -1, GETDATE())) And (ltrim(t_task) Between '10100' And '10530' or ltrim(t_task) Between '12100' AND '13830') " +
-                                "Group By t_year, month(t_rgdt), t_emno, t_cprj, t_cspa, LTRIM(STR(t_year)) + right('0'+LTRIM(STR(MONTH(t_rgdt))), 2)+'28', t_cstl, t_ccco " +
-                                ") a " +
-                                "LEFT JOIN ttccom001100 b ON b.t_emno = a.t_emno " +
-                                "WHERE a.t_emno IN (SELECT t_emno FROM ttccom001100 WHERE t_emno between 100000 and 199999)"
+                                "And Not (LTrim(t_task) in ('11135', '13450')) Group By t_year, t_emno, t_cprj, t_cspa, t_cstl, t_ccco) a " +
+                                "LEFT JOIN ttccom001100 b ON b.t_emno = a.t_emno WHERE a.t_emno IN (SELECT t_emno FROM ttccom001100 WHERE t_emno between 100000 and 199999)"
                 command.ExecuteNonQuery()
 
                 'bei Energie/Müll-Baustellen immer als Element 90000000 angeben
@@ -109,7 +106,7 @@ Module Module1
         Try
             Using conBaan
                 'Lösche alle bestehenden Bewegungen des Jahres weg
-                Dim command As SqlCommand = New SqlCommand("DELETE from ttpppc231100 where t_emno=900250 And t_year=YEAR(DATEADD(MONTH, -1, GETDATE()))", conBaan)
+                Dim command As SqlCommand = New SqlCommand("DELETE from ttpppc231100 where t_emno=900250 and t_year=YEAR(DATEADD(MONTH, -1, GETDATE()))", conBaan)
                 conBaan.Open()
                 command.Connection = conBaan
                 command.ExecuteNonQuery()
@@ -128,9 +125,7 @@ Module Module1
                                       "'1' AS t_potf, t_cstl, '    1060' AS t_ccco, '1' AS t_tetc, '2' AS t_sttl, '0' AS t_txta, 'damii' AS t_loco, '0' AS t_hemp, " +
                                       "'0' AS t_serc, '0' AS t_wgcs, '0' AS t_serh, '0' AS t_Refcntd, '0' AS t_refcntu " +
                                       "FROM (" +            'hier kommt das SQL, mit dem zuerst die Stunden pro Mitarbeiter u. Periode summiert werden
-                                      "Select t_year, MONTH(t_rgdt) As t_peri, t_cprj, t_cspa, LTRIM(STR(t_year))+right('0'+LTRIM(STR(MONTH(t_rgdt))), 2)+'28' AS t_rgdt, " +
-                                      "t_cstl, SUM(t_quan) AS t_quan " +
-                                      "From ttpppc231100 " +
+                                      "Select t_year, MONTH(getdate()) As t_peri, t_cprj, t_cspa, getdate() AS t_rgdt, t_cstl, SUM(t_quan) AS t_quan From ttpppc231100 " +
                                       "Where t_year = YEAR(DATEADD(MONTH, -1, GETDATE())) And LTrim(t_task) like '104%' " +
                                       "GROUP BY t_year, Month(t_rgdt), t_cprj, t_cspa, LTrim(Str(t_year)) + Right('0'+LTRIM(STR(MONTH(t_rgdt))), 2)+'28', t_cstl " +
                                       ") summen LEFT JOIN ttccom001100 b ON b.t_emno=900250"
@@ -183,11 +178,11 @@ Module Module1
                                  "'0' AS t_serh, '0' AS t_Refcntd, '0' AS t_refcntu FROM (" +  'hier kommt das SQL, mit dem zuerst die Stunden pro Periode summiert werden
                                  "Select t_year, Month(t_rgdt) As t_peri, t_cprj, t_cspa, LTrim(Str(t_year)) + Right('0'+LTRIM(STR(MONTH(t_rgdt))), 2)+'28' AS t_rgdt, " +
                                  "t_cstl, SUM(t_quan) AS t_quan FROM ( " +    'hier kommt das SQL mit den Detailstunden eigene u. Dritte Arbeiterstunden
+                                 "Select t_year, Month(getdate()) As t_peri, t_cprj, t_cspa, getdate() AS t_rgdt, t_cstl, SUM(t_quan) AS t_quan FROM ( " +
                                  "SELECT t_year, t_rgdt, t_cprj, t_cspa, t_cstl, t_quan From ttpppc231100 Where t_year = YEAR(DATEADD(MONTH, -1, GETDATE())) And LTrim(t_task) Between '10100' AND '10160' " +
                                  "UNION all " +
                                  "Select t_year, t_rgdt, t_cprj, t_cspa, t_cstl, t_quan FROM ttpppc271100 WHERE t_year = YEAR(DATEADD(MONTH, -1, GETDATE())) And LTrim(t_csub) BETWEEN 'S100' AND 'S150' " +
-                                 ") detail " +
-                                 "GROUP BY t_year, Month(t_rgdt), t_cprj, t_cspa, LTrim(Str(t_year)) + Right('0'+LTRIM(STR(MONTH(t_rgdt))), 2)+'28', t_cstl " +
+                                 ") detail GROUP BY t_year, t_cprj, t_cspa, t_cstl " +
                                  ") summen LEFT JOIN ttccom001100 b ON b.t_emno=900230"
                 command.ExecuteNonQuery()
 
@@ -231,10 +226,10 @@ Module Module1
                                       "t_peri AS t_cper, t_peri AS t_fper, t_year AS t_fyea, '100' AS t_ncmp, '2' AS t_cfpo, '1' AS t_potf, t_cstl, '    1060' AS t_ccco, " +
                                       "'1' AS t_tetc, '2' AS t_sttl, '0' AS t_txta, 'damii' AS t_loco, '0' AS t_hemp, '0' AS t_serc, '0' AS t_wgcs, '0' AS t_serh, " +
                                       "'0' AS t_Refcntd, '0' AS t_refcntu FROM ( " +
-                                      "Select jahr As t_year, MONTH(datum) As t_peri, baustelle As t_cprj, '     ***' AS t_cspa, " +
-                                      "LTRIM(STR(jahr))+right('0'+LTRIM(STR(MONTH(datum))), 2)+'28' AS t_rgdt, '' AS t_cstl, count(*) AS t_quan " +
-                                      "From SRVPREVERO.prev_staging_prod.dbo.t_belegdetail_material Where jahr = YEAR(DATEADD(MONTH, -1, GETDATE())) and ze1=1" +
-                                      "Group By jahr, Month(datum), baustelle, LTrim(Str(jahr)) + Right('0'+LTRIM(STR(MONTH(datum))), 2)+'28' " +
+                                      "Select jahr As t_year, MONTH(getdate()) As t_peri, baustelle As t_cprj, '     ***' AS t_cspa, getdate() AS t_rgdt, '' AS t_cstl, " +
+                                      "count(*) AS t_quan " +
+                                      "From [SRVATZDCBZ040\PREVERO,1434].prev_staging_prod.dbo.t_belegdetail_material Where jahr = YEAR(DATEADD(MONTH, -1, GETDATE())) " +
+                                      "and ze1=1 Group By jahr, baustelle " +
                                       ") summen LEFT JOIN ttccom001100 b ON b.t_emno=900270"
                 command.ExecuteNonQuery()
 
