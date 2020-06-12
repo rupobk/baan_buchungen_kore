@@ -29,7 +29,7 @@ Module Module1
 
         Console.WriteLine("Programm baan_buchungen_kore ohne Fehler beendet!")
         LogSchreiben("Programm baan_buchungen_kore ohne Fehler beendet!")
-        Threading.Thread.Sleep(30000)
+        Threading.Thread.Sleep(10000)
     End Sub
 
     Sub ProgrammParameterLesen()
@@ -46,7 +46,7 @@ Module Module1
             Console.WriteLine("fahrzeugkosten oder werkzeugkosten oder produktionskosten oder logistikkosten")
             LogSchreiben("Sub ProgrammParameterLesen: Programmaufrufparameter falsch!")
             LogSchreiben("Programm baan_buchungen_kore mit Fehler beendet.")
-            Threading.Thread.Sleep(30000)
+            Threading.Thread.Sleep(10000)
             Environment.Exit(0)
         End Try
     End Sub
@@ -76,7 +76,7 @@ Module Module1
                                 "'0' AS t_txta, 'damii' AS t_loco, '0' AS t_hemp, '0' AS t_serc, '0' AS t_wgcs, '0' AS t_serh, '0' AS t_Refcntd, '0' AS t_refcntu " +
                                 "FROM " +
                                 "( " +            'hier kommt das SQL, mit dem zuerst die Stunden pro Mitarbeiter u. Periode summiert werden
-                                "Select t_year, month(getdate()) As t_peri, 100000+t_emno As t_emno, t_cprj, t_cspa, getdate() AS t_rgdt, t_cstl, t_ccco, SUM(t_quan) AS t_quan " +
+                                "Select t_year, Case when year(getdate())>t_year then 12 else Month(getdate()) end as t_peri, 100000+t_emno As t_emno, t_cprj, t_cspa, getdate() AS t_rgdt, t_cstl, t_ccco, SUM(t_quan) AS t_quan " +
                                 "From ttpppc231100 " +
                                 "Where t_year = YEAR(DATEADD(MONTH, -1, GETDATE())) And (ltrim(t_task) Between '10100' And '10530' or ltrim(t_task) Between '12100' AND '13830') " +
                                 "And Not (LTrim(t_task) in ('11135', '13450')) Group By t_year, t_emno, t_cprj, t_cspa, t_cstl, t_ccco) a " +
@@ -92,7 +92,7 @@ Module Module1
             LogSchreiben(ex.Message)
             Console.WriteLine(ex.Message)
             LogSchreiben("Programm BuchenFahrzeugkosten mit Fehler beendet.")
-            Threading.Thread.Sleep(30000)
+            Threading.Thread.Sleep(10000)
             Environment.Exit(0)
         End Try
         Console.WriteLine("Fahrzeugkosten sind gebucht!")
@@ -125,7 +125,7 @@ Module Module1
                                       "'1' AS t_potf, t_cstl, '    1060' AS t_ccco, '1' AS t_tetc, '2' AS t_sttl, '0' AS t_txta, 'damii' AS t_loco, '0' AS t_hemp, " +
                                       "'0' AS t_serc, '0' AS t_wgcs, '0' AS t_serh, '0' AS t_Refcntd, '0' AS t_refcntu " +
                                       "FROM (" +            'hier kommt das SQL, mit dem zuerst die Stunden pro Mitarbeiter u. Periode summiert werden
-                                      "Select t_year, MONTH(getdate()) As t_peri, t_cprj, t_cspa, getdate() AS t_rgdt, t_cstl, SUM(t_quan) AS t_quan From ttpppc231100 " +
+                                      "Select t_year, Case when year(getdate())>t_year then 12 else Month(getdate()) end as t_peri, t_cprj, t_cspa, getdate() AS t_rgdt, t_cstl, SUM(t_quan) AS t_quan From ttpppc231100 " +
                                       "Where t_year = YEAR(DATEADD(MONTH, -1, GETDATE())) And LTrim(t_task) like '104%' " +
                                       "GROUP BY t_year, Month(t_rgdt), t_cprj, t_cspa, LTrim(Str(t_year)) + Right('0'+LTRIM(STR(MONTH(t_rgdt))), 2)+'28', t_cstl " +
                                       ") summen LEFT JOIN ttccom001100 b ON b.t_emno=900250"
@@ -176,9 +176,7 @@ Module Module1
                                  "t_year AS t_cyea, t_peri AS t_cper, t_peri AS t_fper, t_year AS t_fyea, '100' AS t_ncmp, '2' AS t_cfpo, '1' AS t_potf, t_cstl, " +
                                  "'    1060' AS t_ccco, '1' AS t_tetc, '2' AS t_sttl, '0' AS t_txta, 'damii' AS t_loco, '0' AS t_hemp, '0' AS t_serc, '0' AS t_wgcs, " +
                                  "'0' AS t_serh, '0' AS t_Refcntd, '0' AS t_refcntu FROM (" +  'hier kommt das SQL, mit dem zuerst die Stunden pro Periode summiert werden
-                                 "Select t_year, Month(t_rgdt) As t_peri, t_cprj, t_cspa, LTrim(Str(t_year)) + Right('0'+LTRIM(STR(MONTH(t_rgdt))), 2)+'28' AS t_rgdt, " +
-                                 "t_cstl, SUM(t_quan) AS t_quan FROM ( " +    'hier kommt das SQL mit den Detailstunden eigene u. Dritte Arbeiterstunden
-                                 "Select t_year, Month(getdate()) As t_peri, t_cprj, t_cspa, getdate() AS t_rgdt, t_cstl, SUM(t_quan) AS t_quan FROM ( " +
+                                 "Select t_year, Case when year(getdate())>t_year then 12 else Month(getdate()) end as t_peri, t_cprj, t_cspa, getdate() AS t_rgdt, t_cstl, SUM(t_quan) AS t_quan FROM ( " +
                                  "SELECT t_year, t_rgdt, t_cprj, t_cspa, t_cstl, t_quan From ttpppc231100 Where t_year = YEAR(DATEADD(MONTH, -1, GETDATE())) And LTrim(t_task) Between '10100' AND '10160' " +
                                  "UNION all " +
                                  "Select t_year, t_rgdt, t_cprj, t_cspa, t_cstl, t_quan FROM ttpppc271100 WHERE t_year = YEAR(DATEADD(MONTH, -1, GETDATE())) And LTrim(t_csub) BETWEEN 'S100' AND 'S150' " +
@@ -226,7 +224,7 @@ Module Module1
                                       "t_peri AS t_cper, t_peri AS t_fper, t_year AS t_fyea, '100' AS t_ncmp, '2' AS t_cfpo, '1' AS t_potf, t_cstl, '    1060' AS t_ccco, " +
                                       "'1' AS t_tetc, '2' AS t_sttl, '0' AS t_txta, 'damii' AS t_loco, '0' AS t_hemp, '0' AS t_serc, '0' AS t_wgcs, '0' AS t_serh, " +
                                       "'0' AS t_Refcntd, '0' AS t_refcntu FROM ( " +
-                                      "Select jahr As t_year, MONTH(getdate()) As t_peri, baustelle As t_cprj, '     ***' AS t_cspa, getdate() AS t_rgdt, '' AS t_cstl, " +
+                                      "Select jahr As t_year, Case when year(getdate())>jahr then 12 else Month(getdate()) end as t_peri, baustelle As t_cprj, '     ***' AS t_cspa, getdate() AS t_rgdt, '' AS t_cstl, " +
                                       "count(*) AS t_quan " +
                                       "From [SRVATZDCBZ040\PREVERO,1434].prev_staging_prod.dbo.t_belegdetail_material Where jahr = YEAR(DATEADD(MONTH, -1, GETDATE())) " +
                                       "and ze1=1 Group By jahr, baustelle " +
