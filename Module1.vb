@@ -68,6 +68,7 @@ Module Module1
                 '- t_task wird aus den Stammdaten gezogen
                 '- where t_rats between 1 and 3 nimmt nur die Bewegungen der Arbeiter, Fahrer u. Techniker
                 '- Der Stundentarif kommt aus den Stammdaten der Personalnr. mit Kodex über 100000
+                'Achtung: Fahrzeugkosten dürfen nicht auf den Mitarbeiter gebucht werden, weil sonst sieht er sie bei seinen täglichen Bewegungen u. erschreckt!
                 command.CommandText = "INSERT INTO ttpppc231100 " +
                                 "Select t_year, t_peri, a.t_emno as t_emno, ROW_NUMBER() OVER (ORDER BY a.t_emno)+10000 As t_sern, t_cprj, t_cspa, '  1' AS t_cpla, " +
                                 "'     ***' AS t_cact, t_tefx AS t_task, GETDATE() AS t_ltdt, t_rgdt, t_quan, round(t_wgrt, 2) as t_ratc, round(t_wgrt*t_quan, 2) AS t_amoc, " +
