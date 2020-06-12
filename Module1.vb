@@ -69,7 +69,7 @@ Module Module1
                 '- where t_rats between 1 and 3 nimmt nur die Bewegungen der Arbeiter, Fahrer u. Techniker
                 '- Der Stundentarif kommt aus den Stammdaten der Personalnr. mit Kodex über 100000
                 command.CommandText = "INSERT INTO ttpppc231100 " +
-                                "Select t_year, t_peri, a.t_emno-100000 as t_emno, ROW_NUMBER() OVER (ORDER BY a.t_emno)+10000 As t_sern, t_cprj, t_cspa, '  1' AS t_cpla, " +
+                                "Select t_year, t_peri, a.t_emno as t_emno, ROW_NUMBER() OVER (ORDER BY a.t_emno)+10000 As t_sern, t_cprj, t_cspa, '  1' AS t_cpla, " +
                                 "'     ***' AS t_cact, t_tefx AS t_task, GETDATE() AS t_ltdt, t_rgdt, t_quan, round(t_wgrt, 2) as t_ratc, round(t_wgrt*t_quan, 2) AS t_amoc, " +
                                 "0 As t_rats, 0 As t_amos, '001' AS t_cwgt, 'costi autovettura (mov.autom.)' AS t_desc, '' AS t_cdoc, t_year AS t_cyea, t_peri AS t_cper, " +
                                 "t_peri As t_fper, t_year As t_fyea, '100' AS t_ncmp, '2' AS t_cfpo, '1' AS t_potf, t_cstl, t_ccco, '1' AS t_tetc, '2' AS t_sttl, " +
