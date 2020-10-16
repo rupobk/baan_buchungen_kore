@@ -75,12 +75,11 @@ Module Module1
                                 "0 As t_rats, 0 As t_amos, '001' AS t_cwgt, 'costi autovettura (mov.autom.)' AS t_desc, '' AS t_cdoc, t_year AS t_cyea, t_peri AS t_cper, " +
                                 "t_peri As t_fper, t_year As t_fyea, '100' AS t_ncmp, '2' AS t_cfpo, '1' AS t_potf, t_cstl, t_ccco, '1' AS t_tetc, '2' AS t_sttl, " +
                                 "'0' AS t_txta, 'damii' AS t_loco, '0' AS t_hemp, '0' AS t_serc, '0' AS t_wgcs, '0' AS t_serh, '0' AS t_Refcntd, '0' AS t_refcntu " +
-                                "FROM " +
-                                "( " +            'hier kommt das SQL, mit dem zuerst die Stunden pro Mitarbeiter u. Periode summiert werden
-                                "Select t_year, Case when year(getdate())>t_year then 12 else Month(getdate()) end as t_peri, 100000+t_emno As t_emno, t_cprj, t_cspa, getdate() AS t_rgdt, t_cstl, t_ccco, SUM(t_quan) AS t_quan " +
-                                "From ttpppc231100 " +
-                                "Where t_year = YEAR(DATEADD(MONTH, -1, GETDATE())) And (ltrim(t_task) Between '10100' And '10530' or ltrim(t_task) Between '12100' AND '13830') " +
-                                "And Not (LTrim(t_task) in ('11135', '13450')) Group By t_year, t_emno, t_cprj, t_cspa, t_cstl, t_ccco) a " +
+                                "FROM (" +            'hier kommt das SQL, mit dem zuerst die Stunden pro Mitarbeiter u. Periode summiert werden
+                                "select t_year, month(t_rgdt) as t_peri, 100000+t_emno as t_emno, t_cprj, t_cspa, '2020-'+right('0'+ltrim(str(month(t_rgdt))), 2)+'-28' as t_rgdt, " +
+                                "t_cstl, t_ccco, sum(t_quan) as t_quan From ttpppc231100 " +
+                                "Where t_year = Year(DateAdd(Month, -1, GETDATE())) And (LTrim(t_task) Between '10100' And '10530' or ltrim(t_task) Between '12100' AND '13830') " +
+                                "And Not (LTrim(t_task) in ('11135', '13450')) Group By t_year, month(t_rgdt), t_emno, t_cprj, t_cspa, month(t_rgdt), t_cstl, t_ccco) a " +
                                 "LEFT JOIN ttccom001100 b ON b.t_emno = a.t_emno WHERE a.t_emno IN (SELECT t_emno FROM ttccom001100 WHERE t_emno between 100000 and 199999)"
                 command.ExecuteNonQuery()
 
@@ -126,10 +125,15 @@ Module Module1
                                       "'1' AS t_potf, t_cstl, '    1060' AS t_ccco, '1' AS t_tetc, '2' AS t_sttl, '0' AS t_txta, 'damii' AS t_loco, '0' AS t_hemp, " +
                                       "'0' AS t_serc, '0' AS t_wgcs, '0' AS t_serh, '0' AS t_Refcntd, '0' AS t_refcntu " +
                                       "FROM (" +            'hier kommt das SQL, mit dem zuerst die Stunden pro Mitarbeiter u. Periode summiert werden
-                                      "Select t_year, Case when year(getdate())>t_year then 12 else Month(getdate()) end as t_peri, t_cprj, t_cspa, getdate() AS t_rgdt, t_cstl, SUM(t_quan) AS t_quan From ttpppc231100 " +
-                                      "Where t_year = YEAR(DATEADD(MONTH, -1, GETDATE())) And LTrim(t_task) like '104%' " +
-                                      "GROUP BY t_year, Month(t_rgdt), t_cprj, t_cspa, LTrim(Str(t_year)) + Right('0'+LTRIM(STR(MONTH(t_rgdt))), 2)+'28', t_cstl " +
+                                      "select t_year, month(t_rgdt) as t_peri, t_cprj, t_cspa, '2020-'+right('0'+ltrim(str(month(t_rgdt))), 2)+'-28' " +
+                                      "as t_rgdt, t_cstl, sum(t_quan) as t_quan From ttpppc231100 " +
+                                      "Where t_year = Year(DateAdd(Month, -1, GETDATE())) And (LTrim(t_task)) like '104%' " +
+                                      "Group By t_year, month(t_rgdt), t_cprj, t_cspa, month(t_rgdt), t_cstl " +
                                       ") summen LEFT JOIN ttccom001100 b ON b.t_emno=900250"
+                '                                      "Select t_year, Case when year(getdate())>t_year then 12 else Month(getdate()) end as t_peri, t_cprj, t_cspa, getdate() AS t_rgdt, t_cstl, SUM(t_quan) AS t_quan From ttpppc231100 " +
+                '                                      "Where t_year = YEAR(DATEADD(MONTH, -1, GETDATE())) And LTrim(t_task) like '104%' " +
+                '                                     "GROUP BY t_year, Month(t_rgdt), t_cprj, t_cspa, LTrim(Str(t_year)) + Right('0'+LTRIM(STR(MONTH(t_rgdt))), 2)+'28', t_cstl " +
+
                 command.ExecuteNonQuery()
 
                 'Auch Produktionskosten neu rechnen mit Plantarif
@@ -177,11 +181,11 @@ Module Module1
                                  "t_year AS t_cyea, t_peri AS t_cper, t_peri AS t_fper, t_year AS t_fyea, '100' AS t_ncmp, '2' AS t_cfpo, '1' AS t_potf, t_cstl, " +
                                  "'    1060' AS t_ccco, '1' AS t_tetc, '2' AS t_sttl, '0' AS t_txta, 'damii' AS t_loco, '0' AS t_hemp, '0' AS t_serc, '0' AS t_wgcs, " +
                                  "'0' AS t_serh, '0' AS t_Refcntd, '0' AS t_refcntu FROM (" +  'hier kommt das SQL, mit dem zuerst die Stunden pro Periode summiert werden
-                                 "Select t_year, Case when year(getdate())>t_year then 12 else Month(getdate()) end as t_peri, t_cprj, t_cspa, getdate() AS t_rgdt, t_cstl, SUM(t_quan) AS t_quan FROM ( " +
+                                 "Select t_year, month(t_rgdt) as t_peri, t_cprj, t_cspa, '2020-'+right('0'+ltrim(str(month(t_rgdt))), 2)+'-28' AS t_rgdt, t_cstl, SUM(t_quan) AS t_quan FROM (" +
                                  "SELECT t_year, t_rgdt, t_cprj, t_cspa, t_cstl, t_quan From ttpppc231100 Where t_year = YEAR(DATEADD(MONTH, -1, GETDATE())) And LTrim(t_task) Between '10100' AND '10160' " +
                                  "UNION all " +
                                  "Select t_year, t_rgdt, t_cprj, t_cspa, t_cstl, t_quan FROM ttpppc271100 WHERE t_year = YEAR(DATEADD(MONTH, -1, GETDATE())) And LTrim(t_csub) BETWEEN 'S100' AND 'S150' " +
-                                 ") detail GROUP BY t_year, t_cprj, t_cspa, t_cstl " +
+                                 ") detail GROUP BY t_year, month(t_rgdt), t_cprj, t_cspa, month(t_rgdt), t_cstl " +
                                  ") summen LEFT JOIN ttccom001100 b ON b.t_emno=900230"
                 command.ExecuteNonQuery()
 
@@ -225,10 +229,10 @@ Module Module1
                                       "t_peri AS t_cper, t_peri AS t_fper, t_year AS t_fyea, '100' AS t_ncmp, '2' AS t_cfpo, '1' AS t_potf, t_cstl, '    1060' AS t_ccco, " +
                                       "'1' AS t_tetc, '2' AS t_sttl, '0' AS t_txta, 'damii' AS t_loco, '0' AS t_hemp, '0' AS t_serc, '0' AS t_wgcs, '0' AS t_serh, " +
                                       "'0' AS t_Refcntd, '0' AS t_refcntu FROM ( " +
-                                      "Select jahr As t_year, Case when year(getdate())>jahr then 12 else Month(getdate()) end as t_peri, baustelle As t_cprj, '     ***' AS t_cspa, getdate() AS t_rgdt, '' AS t_cstl, " +
+                                      "Select jahr As t_year, month(datum) as t_peri, baustelle As t_cprj, '     ***' AS t_cspa, '2020-'+right('0'+ltrim(str(month(datum))), 2)+'-28' AS t_rgdt, '' AS t_cstl, " +
                                       "count(*) AS t_quan " +
                                       "From [SRVATZDCBZ040\PREVERO,1434].prev_staging_prod.dbo.t_belegdetail_material Where jahr = YEAR(DATEADD(MONTH, -1, GETDATE())) " +
-                                      "and ze1=1 Group By jahr, baustelle " +
+                                      "and ze1=1 Group By jahr, month(datum), baustelle, month(datum) " +
                                       ") summen LEFT JOIN ttccom001100 b ON b.t_emno=900270"
                 command.ExecuteNonQuery()
 
